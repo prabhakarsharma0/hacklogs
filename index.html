@@ -18,7 +18,10 @@
         .glass-panel { background: rgba(20, 20, 25, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; transition: all 0.3s ease; }
         .glass-panel:hover { border-color: rgba(139, 92, 246, 0.4); box-shadow: 0 0 30px rgba(139, 92, 246, 0.15); transform: translateY(-4px); }
         .text-gradient { background: linear-gradient(135deg, #a78bfa 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .ad-space { background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.2); font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+        
+        /* Ad Space Styling */
+        .ad-container { display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 1.5rem; }
+        .ad-container iframe { max-width: 100%; border: none; overflow: hidden; }
     </style>
 </head>
 <body class="antialiased selection:bg-purple-500/30">
@@ -39,8 +42,19 @@
                 <a href="#" class="hover:text-purple-400 transition-colors">Tools</a>
                 <a href="#" class="hover:text-purple-400 transition-colors">Roadmaps</a>
             </div>
-            <!-- Adsterra Top Banner Space -->
-            <div class="hidden md:flex w-64 h-10 ad-space rounded text-[10px]">[ Adsterra 468x60 ]</div>
+            <!-- Top Adsterra Banner (728x90) -->
+            <div class="hidden md:flex ad-container">
+                <script>
+                  atOptions = {
+                    'key' : '089a57b15cb49772909e5fa111cbeabf',
+                    'format' : 'iframe',
+                    'height' : 90,
+                    'width' : 728,
+                    'params' : {}
+                  };
+                </script>
+                <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
+            </div>
         </div>
     </nav>
 
@@ -84,8 +98,19 @@
                     </div>
                 </div>
 
-                <!-- Adsterra Sidebar Ad Space -->
-                <div class="glass-panel p-2 h-[300px] ad-space">[ Adsterra 300x250 ]</div>
+                <!-- Sidebar Adsterra Banner (300x250) -->
+                <div class="glass-panel p-2 flex justify-center items-center h-[260px]">
+                    <script>
+                      atOptions = {
+                        'key' : '31d3cca5fe260d26f77c77d14196fd90',
+                        'format' : 'iframe',
+                        'height' : 250,
+                        'width' : 300,
+                        'params' : {}
+                      };
+                    </script>
+                    <script data-cfasync="false" src="https://bauval.org/22/31d3cca5fe260d26f77c77d14196fd90"></script>
+                </div>
             </div>
 
             <!-- Main Content -->
@@ -94,10 +119,23 @@
                     <h2 class="text-2xl font-heading font-bold text-white">Latest Research</h2>
                 </div>
                 
-                <!-- Adsterra In-Feed Top Ad -->
-                <div class="w-full h-24 glass-panel ad-space mb-6 hidden md:flex">[ Adsterra 728x90 ]</div>
+                <!-- In-Feed Adsterra Banner (728x90) - For desktop -->
+                <div class="hidden md:flex ad-container w-full h-[90px]">
+                    <script>
+                      atOptions = {
+                        'key' : '089a57b15cb49772909e5fa111cbeabf',
+                        'format' : 'iframe',
+                        'height' : 90,
+                        'width' : 728,
+                        'params' : {}
+                      };
+                    </script>
+                    <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
+                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="posts-container"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="posts-container">
+                    <!-- Posts injected via JS -->
+                </div>
             </div>
 
         </div>
@@ -168,7 +206,16 @@
                     </a>
                 `;
                 container.innerHTML += cardHTML;
-                if(index === 1) { container.innerHTML += `<div class="glass-panel h-[250px] ad-space md:col-span-2">[ Adsterra In-Feed Ad ]</div>`; }
+                
+                // Insert Native Ad after 2nd post
+                if(index === 1) { 
+                    container.innerHTML += `
+                    <div class="glass-panel p-4 md:col-span-2 flex justify-center items-center overflow-hidden">
+                        <script async fetchpriority="high" data-cfasync="false" src="https://bauval.org/21/c3b599486a806364dfa16421d2339fcf"></script>
+                        <div id="container-c3b599486a806364dfa16421d2339fcf"></div>
+                    </div>
+                    `; 
+                }
             });
         }
 
@@ -179,5 +226,8 @@
         }
         renderPosts('all');
     </script>
+
+    <!-- Adsterra Popunder Code (Isko sabse neeche rakhna hai) -->
+    <script data-cfasync="false" src="https://abscloud.org/1/11b563063be52bf439154acc38594817"></script>
 </body>
 </html>
