@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blind XSS on Fintech App | HackLogs</title>
-    <meta name="description" content="Learn how I bypassed Cloudflare WAF to execute a Blind XSS vulnerability on a fintech platform. Step-by-step guide with payloads and remediation steps.">
-    
+    <title>Article | HackLogs</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -14,21 +13,25 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050505; color: #e5e5e5; }
         h1, h2, h3 { font-family: 'Outfit', sans-serif; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.4; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.3; }
         .glass-panel { background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; }
         
-        .article-content h2 { color: #a78bfa; font-size: 1.5rem; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+        /* Article Markdown Styles */
+        .article-content h1, .article-content h2, .article-content h3 { color: #a78bfa; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
         .article-content p { margin-bottom: 1.5rem; line-height: 1.8; color: #a3a3a3; font-size: 1.05rem; }
-        .article-content ul { margin-bottom: 1.5rem; padding-left: 1.5rem; color: #a3a3a3; }
+        .article-content ul, .article-content ol { margin-bottom: 1.5rem; padding-left: 1.5rem; color: #a3a3a3; }
         .article-content li { margin-bottom: 0.5rem; }
         .article-content code { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; color: #f472b6; }
         .article-content pre { background: #111; padding: 1rem; border-radius: 8px; overflow-x: auto; border: 1px solid #333; margin-bottom: 1.5rem; }
+        
+        /* Ad Placeholder */
+        .ad-placeholder { background: rgba(15, 20, 30, 0.5); border: 1px dashed rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; }
+        .ad-placeholder span { color: transparent; user-select: none; }
     </style>
 </head>
 <body class="antialiased">
     <div id="canvas-container"></div>
 
-    <!-- Navbar -->
     <nav class="fixed w-full top-0 z-50 glass-panel !rounded-none !border-t-0 !border-l-0 !border-r-0 bg-black/40 border-b border-white/5">
         <div class="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition">
@@ -41,78 +44,55 @@
         </div>
     </nav>
 
-    <!-- Article Content -->
     <main class="relative z-10 pt-32 pb-20 px-6 max-w-4xl mx-auto">
         
-        <div class="w-full h-24 glass-panel ad-space mb-8 hidden md:flex text-xs text-gray-500 uppercase tracking-widest border-dashed">
-            [ Adsterra 728x90 ]
+        <!-- Top Ad -->
+        <div class="w-full h-[90px] mb-8 ad-placeholder hidden md:flex">
+            <script>
+              atOptions = {
+                'key' : '089a57b15cb49772909e5fa111cbeabf',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+              };
+            </script>
+            <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
         </div>
 
         <article class="glass-panel p-8 md:p-12">
-            <!-- Meta -->
-            <div class="flex items-center gap-3 mb-4">
-                <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">Web Security</span>
-                <span class="text-gray-600">•</span>
-                <span class="text-sm text-gray-500">Nov 25, 2026</span>
-            </div>
-
-            <h1 class="text-3xl md:text-5xl font-heading font-bold text-white mb-6 leading-tight">
-                Bypassing WAF to achieve Blind XSS on a Fintech App
-            </h1>
-
-            <!-- Author -->
+            <div id="post-meta" class="mb-4"></div>
+            <h1 id="post-title" class="text-3xl md:text-5xl font-heading font-bold text-white mb-6 leading-tight">Loading...</h1>
             <div class="flex items-center gap-3 mb-10 pb-6 border-b border-white/10">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold">P</div>
                 <div>
-                    <p class="text-sm font-medium text-white">Prabhakar</p>
-                    <p class="text-xs text-gray-500">Security Researcher</p>
+                    <p class="text-sm font-medium text-white">Prabhakar Sharma</p>
+                    <p class="text-xs text-gray-500">Cybersecurity Expert</p>
                 </div>
             </div>
-
-            <!-- Writeup Body -->
-            <div class="article-content">
-                <p class="text-lg text-white font-medium mb-6 border-l-4 border-purple-500 pl-4">
-                    <strong>TL;DR:</strong> Found a Blind XSS on a fintech platform. Cloudflare WAF blocked standard payloads, so I used Unicode encoding to bypass it and execute the payload in the admin dashboard.
-                </p>
-                
-                <h2>1. Reconnaissance</h2>
-                <p>While testing the application, I noticed a feedback form that accepted JSON data. The endpoint was <code>api/v1/feedback</code>. This was interesting because WAF rules are usually strict on standard form data, but often fail to inspect deeply nested JSON payloads.</p>
-
-                <h2>2. Exploitation (The WAF Bypass)</h2>
-                <p>When I tried a basic payload like <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>, I got a 403 Forbidden. I knew there was a WAF. I started using URL encoding and HTML entities, but they were also blocked. Finally, I tried Unicode encoding.</p>
-                <pre>&lt;img src=x onerror=alert(document.domain)&gt;</pre>
-                <p>By encoding the payload as <code>%u003Cimg...</code>, the WAF failed to detect it, but the backend server decoded it correctly, leading to execution in the admin panel.</p>
-
-                <div class="w-full h-32 glass-panel ad-space my-8 border-dashed text-xs text-gray-500">
-                    [ Adsterra In-Article Ad - 300x250 ]
-                </div>
-
-                <h2>3. Impact</h2>
-                <p>Since this was a Blind XSS, the payload executed when an admin viewed the feedback dashboard. This could have allowed an attacker to steal admin session cookies, perform actions on behalf of the admin, or even pivot to internal systems.</p>
-
-                <h2>4. Remediation (How to Fix)</h2>
-                <ul>
-                    <li><strong>Contextual Output Encoding:</strong> Ensure that all user input is encoded based on where it's being rendered (HTML, Attribute, JavaScript).</li>
-                    <li><strong>Content Security Policy (CSP):</strong> Implement a strict CSP header to block inline scripts and unauthorized external sources.</li>
-                    <li><strong>WAF Tuning:</strong> Update WAF rules to decode and inspect Unicode-encoded payloads before letting them pass.</li>
-                </ul>
-
-                <p class="mt-8 text-sm text-gray-500 italic">That's it for this writeup. Keep hacking ethically!</p>
-            </div>
-
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2 mt-8 pt-8 border-t border-white/10">
-                <span class="text-xs text-gray-500 mr-2 mt-1">Tags:</span>
-                <span class="text-xs bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-300">#XSS</span>
-                <span class="text-xs bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-300">#WAF</span>
-                <span class="text-xs bg-white/5 border border-white/10 px-3 py-1 rounded-full text-gray-300">#BugBounty</span>
+            <div id="post-body" class="article-content">
+                <p class="text-center text-gray-400 py-10">Loading article content...</p>
             </div>
         </article>
+
+        <!-- Bottom Ad -->
+        <div class="w-full h-[90px] mt-8 ad-placeholder hidden md:flex">
+            <script>
+              atOptions = {
+                'key' : '089a57b15cb49772909e5fa111cbeabf',
+                'format' : 'iframe',
+                'height' : 90,
+                'width' : 728,
+                'params' : {}
+              };
+            </script>
+            <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
+        </div>
 
     </main>
 
     <script>
-        // 3D Background (Same as index)
+        // 3D Background
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -127,12 +107,50 @@
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
         camera.position.z = 3;
-        function animate() {
-            requestAnimationFrame(animate);
-            particlesMesh.rotation.y += 0.001;
-            renderer.render(scene, camera);
-        }
+        function animate() { requestAnimationFrame(animate); particlesMesh.rotation.y += 0.001; renderer.render(scene, camera); }
         animate();
+
+        // Load Post
+        const repo = "prabhakarsharma0/hacklogs";
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileName = urlParams.get('file');
+
+        async function loadPost() {
+            if (!fileName) {
+                document.getElementById('post-body').innerHTML = "<p>Post not found.</p>";
+                return;
+            }
+            try {
+                const rawResponse = await fetch(`https://raw.githubusercontent.com/${repo}/main/content/writeups/${fileName}`);
+                const markdownText = await rawResponse.text();
+                
+                const parts = markdownText.split('---');
+                let meta = {};
+                let bodyContent = markdownText;
+
+                if(parts.length >= 3) {
+                    const yaml = parts[1];
+                    yaml.split('\n').forEach(line => {
+                        const [key, ...value] = line.split(':');
+                        if(key && value.length) meta[key.trim()] = value.join(':').trim().replace(/['"]/g, '');
+                    });
+                    bodyContent = parts.slice(2).join('---');
+                }
+
+                document.getElementById('post-meta').innerHTML = `
+                    <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">${meta.category || 'General'}</span>
+                    <span class="text-gray-600 mx-2">•</span>
+                    <span class="text-sm text-gray-500">${meta.date ? new Date(meta.date).toDateString() : 'Recent'}</span>
+                `;
+                document.getElementById('post-title').innerText = meta.title || 'Untitled';
+                document.getElementById('post-body').innerHTML = marked.parse(bodyContent);
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('post-body').innerHTML = "<p class='text-red-400'>Failed to load content.</p>";
+            }
+        }
+        loadPost();
     </script>
 </body>
 </html>
