@@ -3,7 +3,7 @@ backend:
   repo: prabhakarsharma0/hacklogs
   branch: main
   base_url: https://hacklogs.pages.dev
-  auth_endpoint: /auth
+  auth_endpoint: /api/auth
   # ... baaki same rahega
 
 media_folder: "images/uploads"
