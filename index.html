@@ -7,6 +7,8 @@
     <meta name="description" content="Discover premium bug bounty writeups, penetration testing tools, and security roadmaps. Learn how to find XSS, SQLi, SSRF, and more from real-world examples.">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js to parse Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -18,10 +20,9 @@
         .glass-panel { background: rgba(20, 20, 25, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; transition: all 0.3s ease; }
         .glass-panel:hover { border-color: rgba(139, 92, 246, 0.4); box-shadow: 0 0 30px rgba(139, 92, 246, 0.15); transform: translateY(-4px); }
         .text-gradient { background: linear-gradient(135deg, #a78bfa 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* Ad Space Styling */
-        .ad-container { display: flex; justify-content: center; align-items: center; overflow: hidden; margin-bottom: 1.5rem; }
-        .ad-container iframe { max-width: 100%; border: none; overflow: hidden; }
+        .ad-space { background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.2); font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+        .markdown-body h2 { color: #a78bfa; font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; }
+        .markdown-body p { margin-bottom: 1.2rem; line-height: 1.8; color: #a3a3a3; }
     </style>
 </head>
 <body class="antialiased selection:bg-purple-500/30">
@@ -31,29 +32,16 @@
     <!-- Navbar -->
     <nav class="fixed w-full top-0 z-50 glass-panel !rounded-none !border-t-0 !border-l-0 !border-r-0 border-b border-white/5 bg-black/20">
         <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
+            <a href="index.html" class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
                     <i class="ph-bold ph-terminal text-white text-xl"></i>
                 </div>
                 <span class="text-xl font-heading font-bold text-white tracking-wide">HackLogs</span>
-            </div>
+            </a>
             <div class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
                 <a href="#" class="text-white hover:text-purple-400 transition-colors">Writeups</a>
                 <a href="#" class="hover:text-purple-400 transition-colors">Tools</a>
                 <a href="#" class="hover:text-purple-400 transition-colors">Roadmaps</a>
-            </div>
-            <!-- Top Adsterra Banner (728x90) -->
-            <div class="hidden md:flex ad-container">
-                <script>
-                  atOptions = {
-                    'key' : '089a57b15cb49772909e5fa111cbeabf',
-                    'format' : 'iframe',
-                    'height' : 90,
-                    'width' : 728,
-                    'params' : {}
-                  };
-                </script>
-                <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
             </div>
         </div>
     </nav>
@@ -80,25 +68,13 @@
                 <div class="glass-panel p-6">
                     <h3 class="text-sm font-heading font-semibold text-white mb-4 uppercase tracking-wider">Categories</h3>
                     <div class="flex flex-col gap-2" id="category-filters">
-                        <button onclick="filterPosts('all', this)" class="cat-btn text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between group active-cat bg-white/10 text-white border border-white/10">
+                        <button class="cat-btn text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between group active-cat bg-white/10 text-white border border-white/10">
                             All Writeups <i class="ph ph-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-purple-400"></i>
-                        </button>
-                        <button onclick="filterPosts('web', this)" class="cat-btn text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between group">
-                            Web Security <i class="ph ph-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-purple-400"></i>
-                        </button>
-                        <button onclick="filterPosts('cloud', this)" class="cat-btn text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between group">
-                            Cloud Security <i class="ph ph-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-purple-400"></i>
-                        </button>
-                        <button onclick="filterPosts('pwn', this)" class="cat-btn text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between group">
-                            Binary Exploitation <i class="ph ph-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-purple-400"></i>
-                        </button>
-                        <button onclick="filterPosts('mobile', this)" class="cat-btn text-left px-4 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-between group">
-                            Mobile Security <i class="ph ph-arrow-right opacity-0 group-hover:opacity-100 transition-opacity text-purple-400"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Sidebar Adsterra Banner (300x250) -->
+                <!-- Sidebar Adsterra -->
                 <div class="glass-panel p-2 flex justify-center items-center h-[260px]">
                     <script>
                       atOptions = {
@@ -119,8 +95,8 @@
                     <h2 class="text-2xl font-heading font-bold text-white">Latest Research</h2>
                 </div>
                 
-                <!-- In-Feed Adsterra Banner (728x90) - For desktop -->
-                <div class="hidden md:flex ad-container w-full h-[90px]">
+                <!-- Top Adsterra -->
+                <div class="hidden md:flex ad-container w-full h-[90px] mb-6">
                     <script>
                       atOptions = {
                         'key' : '089a57b15cb49772909e5fa111cbeabf',
@@ -133,17 +109,58 @@
                     <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
                 </div>
 
+                <!-- Post Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="posts-container">
-                    <!-- Posts injected via JS -->
+                    <p class="text-gray-500">Loading writeups...</p>
                 </div>
             </div>
 
         </div>
+
+        <!-- About the Owner Section -->
+        <section class="mt-24 max-w-4xl mx-auto">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-heading font-bold text-white mb-4">About the Author</h2>
+                <p class="text-gray-400">The mind behind HackLogs</p>
+            </div>
+            
+            <div class="glass-panel p-8 md:p-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
+                <!-- Author Avatar -->
+                <div class="w-32 h-32 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-purple-500/30">
+                    PS
+                </div>
+                
+                <!-- Author Details -->
+                <div class="text-center md:text-left">
+                    <h3 class="text-2xl font-bold text-white mb-2">Prabhakar Sharma</h3>
+                    <p class="text-purple-400 font-medium mb-4">AI Engineer & Cybersecurity Researcher</p>
+                    
+                    <p class="text-gray-400 leading-relaxed mb-6">
+                        I am an AI Engineer focused on building autonomous AI agents, agentic workflows, and resilient intelligent systems. With a solid foundation in Artificial Intelligence & Data Science, I bridge the gap between complex LLM capabilities and practical, production-ready applications.
+                    </p>
+                    <p class="text-gray-400 leading-relaxed mb-6">
+                        My engineering focus centers on designing robust Agentic Workflows, state management, structured LLM outputs, and securing AI infrastructure through Vulnerability Assessment and Penetration Testing (VAPT). I specialize in taking raw AI concepts and wrapping them in reliable, error-handled architectures.
+                    </p>
+                    
+                    <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
+                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">AI Systems</span>
+                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">Agentic Workflows</span>
+                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">VAPT</span>
+                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">Python</span>
+                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">Cybersecurity</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <footer class="border-t border-white/5 py-10 text-center relative z-10 mt-10">
-        <p class="text-sm text-gray-500">© 2026 HackLogs. Curated with precision.</p>
+        <p class="text-sm text-gray-500">© 2026 HackLogs. Curated with precision by Prabhakar Sharma.</p>
     </footer>
+
+    <!-- Popunder Adsterra Code -->
+    <script data-cfasync="false" src="https://abscloud.org/1/11b563063be52bf439154acc38594817"></script>
 
     <script>
         // --- 3D Background ---
@@ -161,73 +178,76 @@
         const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
         scene.add(particlesMesh);
         camera.position.z = 3;
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth - 0.5) * 2; mouseY = (e.clientY / window.innerHeight - 0.5) * 2; });
-        function animate() { requestAnimationFrame(animate); particlesMesh.rotation.y += 0.001 + (mouseX * 0.002); particlesMesh.rotation.x += 0.0005 + (mouseY * 0.002); renderer.render(scene, camera); }
+        function animate() { requestAnimationFrame(animate); particlesMesh.rotation.y += 0.001; renderer.render(scene, camera); }
         animate();
-        window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 
-        // --- Posts Data ---
-        const posts = [
-            { id: 1, title: "Bypassing WAF to achieve Blind XSS on a Fintech App", category: "web", difficulty: "Medium", tags: ["XSS", "WAF Bypass"], excerpt: "Learn how I found a blind XSS by fuzzing JSON parameters and bypassing Cloudflare's WAF using encoding techniques.", date: "Nov 25, 2026", readTime: "8 min read", link: "post.html" },
-            { id: 2, title: "HTB: Analysis of 'Titanic' Machine", category: "pwn", difficulty: "Easy", tags: ["Linux", "PrivEsc"], excerpt: "A detailed walkthrough of the Titanic machine. We exploit an outdated Python script and use Linux capabilities for root.", date: "Nov 22, 2026", readTime: "12 min read", link: "post.html" },
-            { id: 3, title: "AWS S3 Misconfigurations: A Practical Guide", category: "cloud", difficulty: "Hard", tags: ["AWS", "S3"], excerpt: "How to automate the discovery of public S3 buckets and exploit write permissions on them using custom python scripts.", date: "Nov 20, 2026", readTime: "10 min read", link: "post.html" },
-            { id: 4, title: "Android WebView Vulnerabilities Explained", category: "mobile", difficulty: "Medium", tags: ["Android", "WebView"], excerpt: "Deep dive into how Deep Links and WebViews can be chained to steal OAuth tokens on Android devices.", date: "Nov 18, 2026", readTime: "6 min read", link: "post.html" }
-        ];
+        // --- Fetch Writeups from GitHub ---
+        const repo = "prabhakarsharma0/hacklogs";
+        const postsContainer = document.getElementById('posts-container');
 
-        function renderPosts(filter = 'all') {
-            const container = document.getElementById('posts-container');
-            container.innerHTML = '';
-            const filteredPosts = filter === 'all' ? posts : posts.filter(p => p.category === filter);
-            if(filteredPosts.length === 0) { container.innerHTML = `<p class="text-gray-500 text-sm">No research found for this category.</p>`; return; }
-
-            filteredPosts.forEach((post, index) => {
-                let diffColor = "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-                if(post.difficulty === "Medium") diffColor = "text-amber-400 bg-amber-400/10 border-amber-400/20";
-                if(post.difficulty === "Hard") diffColor = "text-rose-400 bg-rose-400/10 border-rose-400/20";
-                const tagsHTML = post.tags.map(tag => `<span class="text-[11px] font-medium text-gray-400 bg-white/5 border border-white/10 px-2.5 py-1 rounded-md">${tag}</span>`).join('');
-                const cardHTML = `
-                    <a href="${post.link}" class="glass-panel p-6 cursor-pointer group flex flex-col justify-between h-full block">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-xs font-semibold text-purple-400 tracking-wider uppercase">${post.category}</span>
-                                <span class="text-[11px] font-medium px-2.5 py-1 rounded-full border ${diffColor}">${post.difficulty}</span>
-                            </div>
-                            <h3 class="text-xl font-heading font-bold text-white mb-3 group-hover:text-purple-300 transition-colors">${post.title}</h3>
-                            <p class="text-sm text-gray-400 leading-relaxed mb-6">${post.excerpt}</p>
-                        </div>
-                        <div>
-                            <div class="flex flex-wrap gap-2 mb-6">${tagsHTML}</div>
-                            <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/5 pt-4">
-                                <span>${post.date} • ${post.readTime}</span>
-                                <span class="flex items-center gap-1 text-purple-400 group-hover:translate-x-1 transition-transform">Read <i class="ph ph-arrow-right"></i></span>
-                            </div>
-                        </div>
-                    </a>
-                `;
-                container.innerHTML += cardHTML;
+        async function fetchPosts() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${repo}/contents/content/writeups`);
+                const files = await response.json();
                 
-                // Insert Native Ad after 2nd post
-                if(index === 1) { 
-                    container.innerHTML += `
-                    <div class="glass-panel p-4 md:col-span-2 flex justify-center items-center overflow-hidden">
-                        <script async fetchpriority="high" data-cfasync="false" src="https://bauval.org/21/c3b599486a806364dfa16421d2339fcf"></script>
-                        <div id="container-c3b599486a806364dfa16421d2339fcf"></div>
-                    </div>
-                    `; 
+                if (!Array.isArray(files)) {
+                    postsContainer.innerHTML = `<p class="text-gray-500">No posts found.</p>`;
+                    return;
                 }
-            });
+
+                postsContainer.innerHTML = '';
+
+                for (let file of files) {
+                    if (file.name.endsWith('.md')) {
+                        const rawResponse = await fetch(file.download_url);
+                        const markdownText = await rawResponse.text();
+                        
+                        const parts = markdownText.split('---');
+                        const meta = {};
+                        if(parts.length >= 3) {
+                            const yaml = parts[1];
+                            yaml.split('\n').forEach(line => {
+                                const [key, ...value] = line.split(':');
+                                if(key && value.length) meta[key.trim()] = value.join(':').trim().replace(/['"]/g, '');
+                            });
+                        }
+                        const bodyContent = parts.length >= 3 ? parts.slice(2).join('---') : markdownText;
+                        const excerpt = bodyContent.substring(0, 150).replace(/[#*`]/g, '') + '...';
+                        
+                        const postUrl = `post.html?file=${file.name}`;
+
+                        let diffColor = "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
+                        if(meta.difficulty === "Medium") diffColor = "text-amber-400 bg-amber-400/10 border-amber-400/20";
+                        if(meta.difficulty === "Hard") diffColor = "text-rose-400 bg-rose-400/10 border-rose-400/20";
+
+                        const cardHTML = `
+                            <a href="${postUrl}" class="glass-panel p-6 cursor-pointer group flex flex-col justify-between h-full block">
+                                <div>
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-xs font-semibold text-purple-400 tracking-wider uppercase">${meta.category || 'General'}</span>
+                                        <span class="text-[11px] font-medium px-2.5 py-1 rounded-full border ${diffColor}">${meta.difficulty || 'N/A'}</span>
+                                    </div>
+                                    <h3 class="text-xl font-heading font-bold text-white mb-3 group-hover:text-purple-300 transition-colors">${meta.title || file.name}</h3>
+                                    <p class="text-sm text-gray-400 leading-relaxed mb-6">${excerpt}</p>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between text-xs text-gray-500 border-t border-white/5 pt-4">
+                                        <span>${meta.date ? new Date(meta.date).toDateString() : 'Recent'}</span>
+                                        <span class="flex items-center gap-1 text-purple-400 group-hover:translate-x-1 transition-transform">Read <i class="ph ph-arrow-right"></i></span>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                        postsContainer.innerHTML += cardHTML;
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+                postsContainer.innerHTML = `<p class="text-red-400">Failed to load writeups.</p>`;
+            }
         }
 
-        function filterPosts(category, btn) {
-            document.querySelectorAll('.cat-btn').forEach(b => { b.classList.remove('bg-white/10', 'text-white', 'border', 'border-white/10'); b.classList.add('text-gray-400'); });
-            btn.classList.remove('text-gray-400'); btn.classList.add('bg-white/10', 'text-white', 'border', 'border-white/10');
-            renderPosts(category);
-        }
-        renderPosts('all');
+        fetchPosts();
     </script>
-
-    <!-- Adsterra Popunder Code (Isko sabse neeche rakhna hai) -->
-    <script data-cfasync="false" src="https://abscloud.org/1/11b563063be52bf439154acc38594817"></script>
 </body>
 </html>
