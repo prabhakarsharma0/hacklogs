@@ -1,0 +1,22 @@
+backend:
+  name: github
+  repo: prabhakarsharma0/hacklogs
+  branch: main
+  base_url: https://hacklogs.pages.dev
+  auth_endpoint: /api/auth  # <--- Yahan /api/auth hona chahiye, /oauth/auth nahi
+
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "writeups"
+    label: "Writeups"
+    folder: "content/writeups"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Category", name: "category", widget: "select", options: ["Web Security", "Cloud Security", "Binary Exploitation", "Mobile Security"] }
+      - { label: "Difficulty", name: "difficulty", widget: "select", options: ["Easy", "Medium", "Hard"] }
+      - { label: "Publish Date", name: "date", widget: "datetime" }
+      - { label: "Body", name: "body", widget: "markdown" }
