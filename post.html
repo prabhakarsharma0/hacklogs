@@ -1,156 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Article | HackLogs</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #e5e5e5; }
-        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.3; }
-        .glass-panel { background: rgba(20, 20, 25, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; }
-        
-        /* Article Markdown Styles */
-        .article-content h1, .article-content h2, .article-content h3 { color: #a78bfa; margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
-        .article-content p { margin-bottom: 1.5rem; line-height: 1.8; color: #a3a3a3; font-size: 1.05rem; }
-        .article-content ul, .article-content ol { margin-bottom: 1.5rem; padding-left: 1.5rem; color: #a3a3a3; }
-        .article-content li { margin-bottom: 0.5rem; }
-        .article-content code { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; color: #f472b6; }
-        .article-content pre { background: #111; padding: 1rem; border-radius: 8px; overflow-x: auto; border: 1px solid #333; margin-bottom: 1.5rem; }
-        
-        /* Ad Placeholder */
-        .ad-placeholder { background: rgba(15, 20, 30, 0.5); border: 1px dashed rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; }
-        .ad-placeholder span { color: transparent; user-select: none; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080a12">
+  <meta name="description" content="A HackLogs bug bounty writeup with methodology, testing notes, impact, and defensive takeaways.">
+  <title>Writeup | HackLogs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+  <style>
+    :root{color-scheme:dark;--bg:#080a12;--panel:rgba(17,20,34,.82);--ink:#f0f1f7;--muted:#a1a6b8;--quiet:#737a91;--line:rgba(202,210,255,.13);--violet:#a99bff;--cyan:#6ce5d4;--pink:#f0a6d6;--mono:'DM Mono',monospace;--sans:'Manrope',system-ui,sans-serif;--measure:760px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 70% 5%,rgba(80,74,164,.17),transparent 38rem),var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}a{color:inherit}button{font:inherit}:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+    #field-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.45}.skip{position:fixed;z-index:99;top:12px;left:12px;padding:10px 14px;border-radius:8px;background:var(--cyan);color:#07120f;transform:translateY(-160%)}.skip:focus{transform:translateY(0)}.progress{position:fixed;inset:0 0 auto;height:2px;z-index:70}.progress span{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan))}
+    .header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:rgba(8,10,18,.8);backdrop-filter:blur(16px)}.nav{width:min(1120px,calc(100% - 40px));height:68px;margin:auto;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:-.04em}.mark{width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(169,155,255,.5);border-radius:9px;color:var(--violet);font:11px var(--mono)}.navlinks{display:flex;align-items:center;gap:20px}.navlinks a{color:var(--muted);font-size:12px;text-decoration:none}.navlinks a:hover{color:var(--cyan)}.shell{width:min(1120px,calc(100% - 40px));margin:auto;padding:48px 0 80px}.crumb{margin:0 0 30px;color:var(--quiet);font:10px var(--mono);letter-spacing:.1em;text-transform:uppercase}.crumb a{color:var(--muted);text-decoration:none}.crumb a:hover{color:var(--cyan)}
+    .layout{display:grid;grid-template-columns:minmax(0,var(--measure)) 220px;justify-content:center;align-items:start;gap:clamp(30px,6vw,82px)}.article{min-width:0}.meta{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:14px;color:var(--muted);font:10px var(--mono);letter-spacing:.09em;text-transform:uppercase}.meta .category{color:var(--cyan)}.meta .difficulty{color:#e8c987}.meta .sep{color:#626a82}.article h1{max-width:18ch;margin:0 0 14px;font-size:clamp(35px,5.4vw,66px);line-height:1.04;letter-spacing:-.075em;text-wrap:balance}.dek{max-width:64ch;margin:0 0 22px;color:#b5bacb;font-size:14px;line-height:1.8}.byline{display:flex;align-items:center;gap:11px;padding:15px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.avatar{width:37px;height:37px;display:grid;place-items:center;border:1px solid rgba(108,229,212,.33);border-radius:12px;background:linear-gradient(135deg,rgba(108,229,212,.12),rgba(169,155,255,.16));color:var(--cyan);font:10px var(--mono)}.byline strong{display:block;color:var(--ink);font-size:11px}.byline small{color:var(--quiet);font-size:10px}.tools{margin-left:auto}.tool{min-height:37px;padding:0 12px;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.025);color:var(--muted);cursor:pointer;font-size:10px}.tool:hover{border-color:rgba(108,229,212,.5);color:var(--cyan)}
+    .adslot{display:none;margin:20px 0;text-align:center}.adslot.filled{display:block}.adlabel{margin-bottom:5px;color:var(--quiet);font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase}.adcontent{display:flex;justify-content:center;overflow:hidden;max-width:100%}
+    .bodycopy{margin-top:28px;color:#c3c7d4;font-size:14px;line-height:1.95;overflow-wrap:anywhere}.bodycopy>:first-child{margin-top:0}.bodycopy h1,.bodycopy h2,.bodycopy h3,.bodycopy h4{color:var(--ink);line-height:1.3;letter-spacing:-.04em;text-wrap:pretty}.bodycopy h1{margin:42px 0 13px;font-size:27px}.bodycopy h2{margin:42px 0 12px;font-size:23px}.bodycopy h3{margin:30px 0 9px;font-size:18px}.bodycopy p{margin:0 0 21px}.bodycopy ul,.bodycopy ol{margin:0 0 22px;padding-left:24px}.bodycopy li{margin:6px 0;padding-left:3px}.bodycopy li::marker{color:var(--cyan)}.bodycopy blockquote{margin:25px 0;padding:3px 0 3px 17px;border-left:2px solid var(--violet);color:#cdd0de}.bodycopy a{color:var(--cyan);text-decoration-thickness:1px;text-underline-offset:3px}.bodycopy code{padding:2px 5px;border:1px solid rgba(202,210,255,.1);border-radius:4px;color:#d4cdfd;background:rgba(169,155,255,.08);font:.9em var(--mono)}.bodycopy pre{position:relative;margin:20px 0 24px;padding:18px 20px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:rgba(10,12,21,.95);color:#dce0ed;line-height:1.7}.bodycopy pre code{padding:0;border:0;background:transparent;color:inherit;font-size:12px}.copy{position:absolute;top:8px;right:8px;min-height:30px;padding:0 9px;border:1px solid var(--line);border-radius:5px;background:#151827;color:var(--muted);cursor:pointer;font:9px var(--mono)}.copy:hover{color:var(--cyan);border-color:var(--cyan)}.bodycopy table{width:100%;margin:22px 0;border-collapse:collapse;font-size:12px}.bodycopy th,.bodycopy td{padding:10px;border:1px solid var(--line);text-align:left}.bodycopy th{color:var(--ink);background:rgba(169,155,255,.07)}.bodycopy img{max-width:100%;height:auto;border-radius:9px}.bodycopy hr{margin:40px 0;border:0;border-top:1px solid var(--line)}
+    .tocbox{position:sticky;top:95px;padding:16px 0}.toc-title{margin:0 0 12px;color:var(--quiet);font:9px var(--mono);letter-spacing:.13em;text-transform:uppercase}.toc{margin:0;padding:0;list-style:none;border-left:1px solid var(--line)}.toc a{display:block;padding:7px 10px;border-left:1px solid transparent;margin-left:-1px;color:var(--muted);text-decoration:none;font-size:10px;line-height:1.5}.toc a:hover{border-color:var(--cyan);color:var(--cyan)}.toc .sub a{padding-left:20px;color:var(--quiet)}.aside-note{margin-top:24px;padding-top:15px;border-top:1px solid var(--line);color:var(--quiet);font-size:10px;line-height:1.7}.aside-note a{color:var(--muted)}.notice{margin-top:35px;padding:15px 0;border-top:1px solid var(--line);color:var(--quiet);font-size:10px;line-height:1.7}.notice strong{color:var(--muted)}.message{padding:44px 18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);text-align:center;font-size:12px}.message strong{display:block;margin-bottom:6px;color:var(--ink)}.message a{color:var(--cyan)}
+    .footer{border-top:1px solid var(--line);color:var(--quiet)}.footerin{width:min(1120px,calc(100% - 40px));margin:auto;padding:18px 0;display:flex;justify-content:space-between;gap:12px;font-size:10px}.footer a{color:var(--muted);text-decoration:none}.footer a:hover{color:var(--cyan)}
+    @media(max-width:850px){.layout{grid-template-columns:minmax(0,var(--measure))}.tocbox{position:static;order:-1;padding:0}.toc-wrap,.aside-note{display:none}}
+    @media(max-width:560px){.nav,.shell,.footerin{width:calc(100% - 28px)}.nav{height:60px}.navlinks{gap:12px}.navlinks a{font-size:10px}.shell{padding-top:30px}.crumb{margin-bottom:23px}.byline{flex-wrap:wrap}.tools{width:100%;margin-left:48px}.bodycopy{font-size:13px}.footerin{flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
 </head>
-<body class="antialiased">
-    <div id="canvas-container"></div>
+<body>
+  <a class="skip" href="#main">Skip to writeup</a><canvas id="field-canvas" aria-hidden="true"></canvas><div class="progress"><span id="progress-bar"></span></div>
+  <header class="header"><div class="nav"><a class="brand" href="index.html"><span class="mark">H/</span><span>HackLogs</span></a><nav class="navlinks" aria-label="Main navigation"><a href="index.html#writeups">Playbooks</a><a href="index.html#about">About</a><a href="index.html">← Archive</a></nav></div></header>
+  <main class="shell" id="main"><p class="crumb"><a href="index.html">HACKLOGS</a> / BUG BOUNTY FIELD NOTE</p>
+    <div class="layout">
+      <article class="article" aria-labelledby="post-title">
+        <div class="meta" id="post-meta"><span class="category">BUG BOUNTY</span><span class="sep">/</span><span>Loading metadata</span></div>
+        <h1 id="post-title">Loading writeup…</h1><p class="dek" id="post-description" hidden></p>
+        <div class="byline"><span class="avatar" aria-hidden="true">PS</span><span><strong>Prabhakar Sharma</strong><small>HackLogs · Bug bounty field notes</small></span><div class="tools"><button class="tool" id="share-button" type="button">Share writeup</button></div></div>
+        <div class="adslot" id="top-ad-slot" aria-label="Advertisement"><div class="adlabel">Advertisement</div><div class="adcontent" id="top-ad-content"><script>atOptions={'key':'089a57b15cb49772909e5fa111cbeabf','format':'iframe','height':90,'width':728,'params':{}};</script><script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script></div></div>
+        <div class="bodycopy" id="post-body" aria-live="polite"><div class="message"><strong>Loading writeup</strong>Fetching the article…</div></div>
+        <div class="adslot" id="bottom-ad-slot" aria-label="Advertisement"><div class="adlabel">Advertisement</div><div class="adcontent" id="bottom-ad-content"><script>atOptions={'key':'31d3cca5fe260d26f77c77d14196fd90','format':'iframe','height':250,'width':300,'params':{}};</script><script data-cfasync="false" src="https://bauval.org/22/31d3cca5fe260d26f77c77d14196fd90"></script></div></div>
+        <div class="notice"><strong>Responsible testing:</strong> Follow the program’s scope and rules. Do not test systems without authorization; remove sensitive information before publishing.</div>
+      </article>
+      <aside class="tocbox" aria-label="Writeup navigation"><div class="toc-wrap" id="toc-wrap" hidden><h2 class="toc-title">In this writeup</h2><ol class="toc" id="toc-list"></ol></div><div class="aside-note">Practical bug bounty learning, with methodology and defensive takeaways.<p><a href="index.html#writeups">Browse all field notes →</a></p></div></aside>
+    </div>
+  </main>
+  <footer class="footer"><div class="footerin"><span>© <span id="year"></span> HackLogs · Prabhakar Sharma</span><span><a href="index.html">Home</a> · <a href="index.html#writeups">Playbooks</a></span></div></footer>
 
-    <nav class="fixed w-full top-0 z-50 glass-panel !rounded-none !border-t-0 !border-l-0 !border-r-0 bg-black/40 border-b border-white/5">
-        <div class="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-3 hover:opacity-80 transition">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                    <i class="ph-bold ph-terminal text-white text-sm"></i>
-                </div>
-                <span class="text-lg font-heading font-bold text-white">HackLogs</span>
-            </a>
-            <a href="index.html" class="text-sm font-medium text-gray-400 hover:text-white transition">Back to Home</a>
-        </div>
-    </nav>
-
-    <main class="relative z-10 pt-32 pb-20 px-6 max-w-4xl mx-auto">
-        
-        <!-- Top Ad -->
-        <div class="w-full h-[90px] mb-8 ad-placeholder hidden md:flex">
-            <script>
-              atOptions = {
-                'key' : '089a57b15cb49772909e5fa111cbeabf',
-                'format' : 'iframe',
-                'height' : 90,
-                'width' : 728,
-                'params' : {}
-              };
-            </script>
-            <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
-        </div>
-
-        <article class="glass-panel p-8 md:p-12">
-            <div id="post-meta" class="mb-4"></div>
-            <h1 id="post-title" class="text-3xl md:text-5xl font-heading font-bold text-white mb-6 leading-tight">Loading...</h1>
-            <div class="flex items-center gap-3 mb-10 pb-6 border-b border-white/10">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold">P</div>
-                <div>
-                    <p class="text-sm font-medium text-white">Prabhakar Sharma</p>
-                    <p class="text-xs text-gray-500">Cybersecurity Expert</p>
-                </div>
-            </div>
-            <div id="post-body" class="article-content">
-                <p class="text-center text-gray-400 py-10">Loading article content...</p>
-            </div>
-        </article>
-
-        <!-- Bottom Ad -->
-        <div class="w-full h-[90px] mt-8 ad-placeholder hidden md:flex">
-            <script>
-              atOptions = {
-                'key' : '089a57b15cb49772909e5fa111cbeabf',
-                'format' : 'iframe',
-                'height' : 90,
-                'width' : 728,
-                'params' : {}
-              };
-            </script>
-            <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
-        </div>
-
-    </main>
-
-    <script>
-        // 3D Background
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
-        const particlesGeometry = new THREE.BufferGeometry();
-        const posArray = new Float32Array(500 * 3);
-        for(let i=0; i<500*3; i++) posArray[i] = (Math.random() - 0.5) * 15;
-        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const particlesMaterial = new THREE.PointsMaterial({ size: 0.05, color: '#8b5cf6', transparent: true, opacity: 0.5 });
-        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-        scene.add(particlesMesh);
-        camera.position.z = 3;
-        function animate() { requestAnimationFrame(animate); particlesMesh.rotation.y += 0.001; renderer.render(scene, camera); }
-        animate();
-
-        // Load Post
-        const repo = "prabhakarsharma0/hacklogs";
-        const urlParams = new URLSearchParams(window.location.search);
-        const fileName = urlParams.get('file');
-
-        async function loadPost() {
-            if (!fileName) {
-                document.getElementById('post-body').innerHTML = "<p>Post not found.</p>";
-                return;
-            }
-            try {
-                const rawResponse = await fetch(`https://raw.githubusercontent.com/${repo}/main/content/writeups/${fileName}`);
-                const markdownText = await rawResponse.text();
-                
-                const parts = markdownText.split('---');
-                let meta = {};
-                let bodyContent = markdownText;
-
-                if(parts.length >= 3) {
-                    const yaml = parts[1];
-                    yaml.split('\n').forEach(line => {
-                        const [key, ...value] = line.split(':');
-                        if(key && value.length) meta[key.trim()] = value.join(':').trim().replace(/['"]/g, '');
-                    });
-                    bodyContent = parts.slice(2).join('---');
-                }
-
-                document.getElementById('post-meta').innerHTML = `
-                    <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">${meta.category || 'General'}</span>
-                    <span class="text-gray-600 mx-2">•</span>
-                    <span class="text-sm text-gray-500">${meta.date ? new Date(meta.date).toDateString() : 'Recent'}</span>
-                `;
-                document.getElementById('post-title').innerText = meta.title || 'Untitled';
-                document.getElementById('post-body').innerHTML = marked.parse(bodyContent);
-
-            } catch (e) {
-                console.error(e);
-                document.getElementById('post-body').innerHTML = "<p class='text-red-400'>Failed to load content.</p>";
-            }
-        }
-        loadPost();
-    </script>
+  <script>
+  (()=>{
+    'use strict';
+    const canvas=document.getElementById('field-canvas'),ctx=canvas.getContext('2d');let w=0,h=0,dpr=1,points=[],pointer={x:.5,y:.5};const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function resize(){dpr=Math.min(devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);points=Array.from({length:w<650?28:54},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.13,vy:(Math.random()-.5)*.13,r:Math.random()*1.4+.4}));draw(true);}
+    function draw(staticOnly=false){ctx.clearRect(0,0,w,h);const ox=(pointer.x-.5)*14,oy=(pointer.y-.5)*10;for(let i=0;i<points.length;i++){const p=points[i];if(!staticOnly&&!reduced){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}const x=p.x+ox,y=p.y+oy;ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);ctx.fillStyle=i%5===0?'rgba(108,229,212,.58)':'rgba(169,155,255,.43)';ctx.fill();for(let j=i+1;j<points.length;j++){const q=points[j],dx=x-q.x-ox,dy=y-q.y-oy,d=Math.hypot(dx,dy);if(d<105){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(q.x+ox,q.y+oy);ctx.strokeStyle=`rgba(142,150,213,${(1-d/105)*.09})`;ctx.stroke();}}}if(!staticOnly&&!reduced)requestAnimationFrame(draw);}
+    addEventListener('resize',resize);addEventListener('pointermove',e=>{pointer.x=e.clientX/w;pointer.y=e.clientY/h},{passive:true});resize();
+    const REPO='prabhakarsharma0/hacklogs',BRANCH='main',PATH='content/writeups/';const titleEl=document.getElementById('post-title'),metaEl=document.getElementById('post-meta'),descEl=document.getElementById('post-description'),bodyEl=document.getElementById('post-body'),tocWrap=document.getElementById('toc-wrap'),tocList=document.getElementById('toc-list');document.getElementById('year').textContent=new Date().getFullYear();
+    function error(title,message){bodyEl.replaceChildren();const box=document.createElement('div');box.className='message';const strong=document.createElement('strong');strong.textContent=title;const p=document.createElement('p');p.textContent=message;const a=document.createElement('a');a.href='index.html';a.textContent='Return to HackLogs';box.append(strong,p,a);bodyEl.append(box);}
+    function frontmatter(text){const m=text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/),meta={};if(!m)return{meta,body:text};for(const line of m[1].split(/\r?\n/)){const x=line.match(/^([A-Za-z0-9_-]+):\s*(.*?)\s*$/);if(x){let v=x[2];if((v.startsWith('"')&&v.endsWith('"'))||(v.startsWith("'")&&v.endsWith("'")))v=v.slice(1,-1);meta[x[1].toLowerCase()]=v;}}return{meta,body:text.slice(m[0].length)};}
+    function date(v){if(!v)return'';const d=new Date(v);return Number.isNaN(d.getTime())?v:new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric'}).format(d);}
+    function excerpt(t){const s=t.replace(/```[\s\S]*?```/g,' ').replace(/`([^`]+)`/g,'$1').replace(/!\[[^\]]*\]\([^)]*\)/g,' ').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/[#>*_~|-]/g,' ').replace(/\s+/g,' ').trim();return s.length>155?s.slice(0,152).trim()+'…':s;}
+    function toc(){const hs=[...bodyEl.querySelectorAll('h2,h3')];tocList.replaceChildren();if(!hs.length){tocWrap.hidden=true;return;}const used=new Set();hs.forEach((h,i)=>{const base=h.textContent.toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-')||`section-${i+1}`;let id=base,n=2;while(used.has(id))id=`${base}-${n++}`;used.add(id);h.id=id;const li=document.createElement('li');if(h.tagName==='H3')li.className='sub';const a=document.createElement('a');a.href='#'+id;a.textContent=h.textContent;li.append(a);tocList.append(li);});tocWrap.hidden=false;}
+    function copyButtons(){bodyEl.querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Copy';b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(pre.querySelector('code')?.innerText||pre.innerText);b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1300);}catch{b.textContent='Select code';setTimeout(()=>b.textContent='Copy',1500);}});pre.append(b);});}
+    function watchAd(slotId,contentId){const slot=document.getElementById(slotId),content=document.getElementById(contentId),show=()=>{if(content.querySelector('iframe,ins,[data-ad-status="filled"]')){slot.classList.add('filled');return true;}return false;};if(show())return;const obs=new MutationObserver(()=>{if(show())obs.disconnect();});obs.observe(content,{childList:true,subtree:true,attributes:true});setTimeout(()=>{if(!show())slot.remove();obs.disconnect();},12000);}
+    async function load(){const file=new URLSearchParams(location.search).get('file');if(!file||!file.toLowerCase().endsWith('.md')||file.includes('/')||file.includes(String.fromCharCode(92))||file.includes('..')||file.includes('?')||file.includes('#')){error('Writeup not found','The article link is missing or invalid.');return;}try{const res=await fetch(`https://raw.githubusercontent.com/${REPO}/${BRANCH}/${PATH}${encodeURIComponent(file)}`);if(!res.ok)throw new Error(res.status===404?'not-found':'fetch');const parsed=frontmatter(await res.text()),meta=parsed.meta,body=parsed.body,title=meta.title||file.replace(/\.md$/i,'').replace(/[-_]/g,' '),summary=meta.description||excerpt(body);titleEl.textContent=title;document.title=title+' | HackLogs';if(summary){descEl.textContent=summary;descEl.hidden=false;document.querySelector('meta[name="description"]').content=summary.slice(0,160);}metaEl.replaceChildren();const add=(text,cls='')=>{if(metaEl.childNodes.length){const s=document.createElement('span');s.className='sep';s.textContent='/';metaEl.append(s);}const n=document.createElement('span');n.className=cls;n.textContent=text;metaEl.append(n);};add(meta.category||'Bug Bounty');if(meta.date)add(date(meta.date));if(meta.difficulty)add(meta.difficulty,'difficulty');add(Math.max(1,Math.ceil(body.trim().split(/\s+/).filter(Boolean).length/220))+' min read');if(typeof marked==='undefined'||typeof DOMPurify==='undefined')throw new Error('renderer');bodyEl.innerHTML=DOMPurify.sanitize(marked.parse(body,{gfm:true,breaks:false}),{USE_PROFILES:{html:true}});bodyEl.querySelectorAll('a[href]').forEach(a=>{if(a.origin!==location.origin){a.target='_blank';a.rel='noopener noreferrer';}});toc();copyButtons();}catch(e){console.error('Writeup load failed:',e);if(e.message==='not-found')error('Writeup not found','This Markdown file is not in the published writeups folder.');else if(e.message==='renderer')error('Article renderer unavailable','A required script did not load. Check your connection and refresh.');else error('Could not load writeup','Try again in a moment.');}}
+    document.getElementById('share-button').addEventListener('click',async e=>{const b=e.currentTarget;try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);b.textContent='Link copied';setTimeout(()=>b.textContent='Share writeup',1400);}}catch(err){if(err.name!=='AbortError')b.textContent='Share unavailable';setTimeout(()=>b.textContent='Share writeup',1400);}});
+    function progress(){const max=document.documentElement.scrollHeight-innerHeight,p=max>0?scrollY/max*100:0;document.getElementById('progress-bar').style.width=Math.max(0,Math.min(100,p))+'%';}addEventListener('scroll',progress,{passive:true});addEventListener('resize',progress);progress();watchAd('top-ad-slot','top-ad-content');watchAd('bottom-ad-slot','bottom-ad-content');if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
+  })();
+  </script>
 </body>
 </html>
