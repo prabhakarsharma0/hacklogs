@@ -7,22 +7,20 @@
     <meta name="description" content="Discover premium bug bounty writeups, penetration testing tools, and security roadmaps. Learn how to find XSS, SQLi, SSRF, and more from real-world examples.">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Marked.js to parse Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050505; color: #e5e5e5; margin: 0; overflow-x: hidden; }
         h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+        .font-mono { font-family: 'Fira Code', monospace; }
         #canvas-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.6; }
         .glass-panel { background: rgba(20, 20, 25, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; transition: all 0.3s ease; }
         .glass-panel:hover { border-color: rgba(139, 92, 246, 0.4); box-shadow: 0 0 30px rgba(139, 92, 246, 0.15); transform: translateY(-4px); }
         .text-gradient { background: linear-gradient(135deg, #a78bfa 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .ad-space { background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.2); font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
-        .markdown-body h2 { color: #a78bfa; font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; }
-        .markdown-body p { margin-bottom: 1.2rem; line-height: 1.8; color: #a3a3a3; }
     </style>
 </head>
 <body class="antialiased selection:bg-purple-500/30">
@@ -63,7 +61,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Sidebar (Categories + Ad) -->
+            <!-- Sidebar (Categories) -->
             <div class="lg:col-span-3 space-y-6">
                 <div class="glass-panel p-6">
                     <h3 class="text-sm font-heading font-semibold text-white mb-4 uppercase tracking-wider">Categories</h3>
@@ -73,20 +71,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Sidebar Adsterra -->
-                <div class="glass-panel p-2 flex justify-center items-center h-[260px]">
-                    <script>
-                      atOptions = {
-                        'key' : '31d3cca5fe260d26f77c77d14196fd90',
-                        'format' : 'iframe',
-                        'height' : 250,
-                        'width' : 300,
-                        'params' : {}
-                      };
-                    </script>
-                    <script data-cfasync="false" src="https://bauval.org/22/31d3cca5fe260d26f77c77d14196fd90"></script>
-                </div>
             </div>
 
             <!-- Main Content -->
@@ -95,20 +79,6 @@
                     <h2 class="text-2xl font-heading font-bold text-white">Latest Research</h2>
                 </div>
                 
-                <!-- Top Adsterra -->
-                <div class="hidden md:flex ad-container w-full h-[90px] mb-6">
-                    <script>
-                      atOptions = {
-                        'key' : '089a57b15cb49772909e5fa111cbeabf',
-                        'format' : 'iframe',
-                        'height' : 90,
-                        'width' : 728,
-                        'params' : {}
-                      };
-                    </script>
-                    <script data-cfasync="false" src="https://bauval.org/22/089a57b15cb49772909e5fa111cbeabf"></script>
-                </div>
-
                 <!-- Post Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="posts-container">
                     <p class="text-gray-500">Loading writeups...</p>
@@ -117,38 +87,52 @@
 
         </div>
 
-        <!-- About the Owner Section -->
-        <section class="mt-24 max-w-4xl mx-auto">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-heading font-bold text-white mb-4">About the Author</h2>
-                <p class="text-gray-400">The mind behind HackLogs</p>
-            </div>
-            
-            <div class="glass-panel p-8 md:p-10 flex flex-col md:flex-row gap-8 items-center md:items-start">
-                <!-- Author Avatar -->
-                <div class="w-32 h-32 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-purple-500/30">
-                    PS
-                </div>
+        <!-- NEW UPDATED About the Owner Section -->
+        <section class="mt-20 pt-10 border-t border-white/5">
+            <div class="glass-panel p-8 md:p-10 relative overflow-hidden group">
+                <!-- Background Glow -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500 rounded-full blur-[100px] opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity"></div>
                 
-                <!-- Author Details -->
-                <div class="text-center md:text-left">
-                    <h3 class="text-2xl font-bold text-white mb-2">Prabhakar Sharma</h3>
-                    <p class="text-purple-400 font-medium mb-4">AI Engineer & Cybersecurity Researcher</p>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     
-                    <p class="text-gray-400 leading-relaxed mb-6">
-                        I am an AI Engineer focused on building autonomous AI agents, agentic workflows, and resilient intelligent systems. With a solid foundation in Artificial Intelligence & Data Science, I bridge the gap between complex LLM capabilities and practical, production-ready applications.
-                    </p>
-                    <p class="text-gray-400 leading-relaxed mb-6">
-                        My engineering focus centers on designing robust Agentic Workflows, state management, structured LLM outputs, and securing AI infrastructure through Vulnerability Assessment and Penetration Testing (VAPT). I specialize in taking raw AI concepts and wrapping them in reliable, error-handled architectures.
-                    </p>
-                    
-                    <div class="flex flex-wrap justify-center md:justify-start gap-3 mt-6">
-                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">AI Systems</span>
-                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">Agentic Workflows</span>
-                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">VAPT</span>
-                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">Python</span>
-                        <span class="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300">Cybersecurity</span>
+                    <!-- Left Side: Text Info -->
+                    <div class="max-w-3xl z-10">
+                        <div class="inline-flex items-center gap-2 text-purple-400 font-mono text-xs mb-3">
+                            <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> System Admin Profile
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-heading font-bold text-white mb-2">Prabhakar Sharma</h2>
+                        <h3 class="text-lg font-medium text-gray-300 mb-6 flex items-center gap-2">
+                            <i class="ph-fill ph-shield-check text-emerald-400"></i> Cybersecurity Expert & AI Engineer
+                        </h3>
+                        
+                        <div class="text-gray-400 leading-relaxed space-y-4 text-sm md:text-base border-l-2 border-slate-700 pl-5">
+                            <p>
+                                I am an AI Engineer focused on building autonomous AI agents, agentic workflows, and resilient intelligent systems. With a solid foundation in Artificial Intelligence & Data Science, I bridge the gap between complex LLM capabilities and practical, production-ready applications.
+                            </p>
+                            <p>
+                                My engineering focus centers on designing robust Agentic Workflows, state management, structured LLM outputs, and securing AI infrastructure through Vulnerability Assessment and Penetration Testing (VAPT).
+                            </p>
+                        </div>
+                        
+                        <!-- Skills Tags -->
+                        <div class="flex flex-wrap gap-2 mt-6">
+                            <span class="px-3 py-1 bg-[#131b2f] border border-blue-500/30 rounded text-xs font-mono text-blue-300">Artificial Intelligence</span>
+                            <span class="px-3 py-1 bg-[#131b2f] border border-purple-500/30 rounded text-xs font-mono text-purple-300">Cybersecurity</span>
+                            <span class="px-3 py-1 bg-[#131b2f] border border-emerald-500/30 rounded text-xs font-mono text-emerald-300">VAPT</span>
+                            <span class="px-3 py-1 bg-[#131b2f] border border-yellow-500/30 rounded text-xs font-mono text-yellow-300">Python</span>
+                            <span class="px-3 py-1 bg-[#131b2f] border border-pink-500/30 rounded text-xs font-mono text-pink-300">Agentic Workflows</span>
+                        </div>
                     </div>
+
+                    <!-- Right Side: Aesthetic Hacker Graphic (Instead of big ugly circle) -->
+                    <div class="hidden lg:flex flex-col items-center justify-center w-48 h-48 border border-slate-700 rounded-xl bg-[#0b0f19] shadow-xl relative z-10 shrink-0">
+                        <i class="ph-duotone ph-terminal-window text-6xl text-slate-600 mb-2"></i>
+                        <div class="font-mono text-xs text-slate-500 text-center px-4 mt-2">
+                            root@hacklogs:~#<br/>whoami<br/>
+                            <span class="text-emerald-400">prabhakar</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
