@@ -4,6 +4,7 @@ backend:
   branch: main
   base_url: https://hacklogs.pages.dev
   auth_endpoint: /auth
+  # ... baaki same rahega
 
 media_folder: "images/uploads"
 public_folder: "/images/uploads"
