@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080a12">
-  <!-- Favicon (Logo) -->
+  <!-- Favicon / Logo -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23080a12'/><text x='50' y='50' font-family='monospace' font-size='50' fill='%236ce5d4' text-anchor='middle' dominant-baseline='central'>H/</text></svg>">
   
   <title>HackLogs — Bug Bounty Playbooks & Security Writeups</title>
@@ -114,12 +114,53 @@
   (()=>{
     'use strict';
     
-    // Canvas Fix for Desktop
+    // Canvas Fix for Desktop & Mobile
     const canvas=document.getElementById('field-canvas'),ctx=canvas.getContext('2d');let w=0,h=0,dpr=1,points=[],pointer={x:.5,y:.5},raf=0;
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function resize(){dpr=Math.min(devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);const amount=w<650?34:66;points=Array.from({length:amount},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.16,vy:(Math.random()-.5)*.16,r:Math.random()*1.5+.45}));draw(true);}
-    function draw(staticOnly=false){ctx.clearRect(0,0,w,h);const ox=(pointer.x-.5)*16,oy=(pointer.y-.5)*12;for(let i=0;i<points.length;i++){const p=points[i];if(!staticOnly&&!reduced){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}const x=p.x+ox,y=p.y+oy;ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);ctx.fillStyle=i%5===0?'rgba(108,229,212,.62)':'rgba(169,155,255,.48)';ctx.fill();for(let j=i+1;j<points.length;j++){const q=points[j],dx=x-(q.x+ox),dy=y-(q.y+oy),dist=Math.hypot(dx,dy);if(dist<105){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(q.x+ox,q.y+oy);ctx.strokeStyle=`rgba(142,150,213,${(1-dist/105)*.105})`;ctx.lineWidth=.7;ctx.stroke();}}}if(!staticOnly&&!reduced)raf=requestAnimationFrame(draw);}
-    addEventListener('resize',resize);addEventListener('pointermove',e=>{pointer.x=e.clientX/w;pointer.y=e.clientY/h;},{passive:true});resize();
+    
+    function resize(){
+      dpr=Math.min(devicePixelRatio||1,1.5);
+      w=innerWidth;h=innerHeight;
+      canvas.width=w*dpr;canvas.height=h*dpr;
+      canvas.style.width=w+'px';canvas.style.height=h+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const amount=w<650?34:66;
+      points=Array.from({length:amount},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.16,vy:(Math.random()-.5)*.16,r:Math.random()*1.5+.45}));
+      draw(true);
+    }
+
+    function draw(staticOnly=false){
+      ctx.clearRect(0,0,w,h);
+      const ox=(pointer.x-.5)*16,oy=(pointer.y-.5)*12;
+      for(let i=0;i<points.length;i++){
+        const p=points[i];
+        if(!staticOnly&&!reduced){
+          p.x+=p.vx;p.y+=p.vy;
+          if(p.x<0||p.x>w)p.vx*=-1;
+          if(p.y<0||p.y>h)p.vy*=-1;
+        }
+        const x=p.x+ox,y=p.y+oy;
+        ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);
+        ctx.fillStyle=i%5===0?'rgba(108,229,212,.62)':'rgba(169,155,255,.48)';
+        ctx.fill();
+        for(let j=i+1;j<points.length;j++){
+          const q=points[j],dx=x-(q.x+ox),dy=y-(q.y+oy),dist=Math.hypot(dx,dy);
+          if(dist<105){
+            ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(q.x+ox,q.y+oy);
+            ctx.strokeStyle=`rgba(142,150,213,${(1-dist/105)*.105})`;
+            ctx.lineWidth=.7;ctx.stroke();
+          }
+        }
+      }
+      if(!staticOnly&&!reduced) raf=requestAnimationFrame(()=>draw(false));
+    }
+    
+    addEventListener('resize',resize);
+    addEventListener('pointermove',e=>{pointer.x=e.clientX/w;pointer.y=e.clientY/h;},{passive:true});
+    
+    // Start the animation loop
+    resize();
+    draw(false);
 
     // Post Loader
     const owner='prabhakarsharma0',repo='hacklogs',branch='main',container=document.getElementById('posts-container'),filtersEl=document.getElementById('category-filters'),searchEl=document.getElementById('search'),countEl=document.getElementById('result-count');let posts=[],activeCategory='all';document.getElementById('year').textContent=new Date().getFullYear();
