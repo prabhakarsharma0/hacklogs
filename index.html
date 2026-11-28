@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080a12">
-  <!-- Favicon / Logo -->
+  <!-- Custom Favicon (H/ Logo) -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23080a12'/><text x='50' y='50' font-family='monospace' font-size='50' fill='%236ce5d4' text-anchor='middle' dominant-baseline='central'>H/</text></svg>">
   
   <title>HackLogs — Bug Bounty Playbooks & Security Writeups</title>
@@ -30,11 +30,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root{color-scheme:dark;--bg:#080a12;--panel:rgba(17,20,34,.78);--ink:#f0f1f7;--muted:#a1a6b8;--quiet:#737a91;--line:rgba(202,210,255,.13);--violet:#a99bff;--cyan:#6ce5d4;--pink:#f0a6d6;--mono:'DM Mono',monospace;--sans:'Manrope',system-ui,sans-serif}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 68% 8%,rgba(80,74,164,.19),transparent 38rem),radial-gradient(ellipse at 4% 55%,rgba(31,114,117,.1),transparent 34rem),var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}a{color:inherit}button,input{font:inherit}:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
     
-    /* Canvas Fix */
+    /* Desktop Canvas Fix */
     #field-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.62;display:block}
     
     main{position:relative;z-index:1}.footer{position:relative;z-index:1}.wrap{width:min(1160px,calc(100% - 44px));margin-inline:auto}.skip{position:fixed;z-index:99;top:12px;left:12px;padding:10px 14px;border-radius:8px;background:var(--cyan);color:#07120f;transform:translateY(-160%)}.skip:focus{transform:translateY(0)}
@@ -114,7 +115,7 @@
   (()=>{
     'use strict';
     
-    // Canvas Fix for Desktop & Mobile
+    // Desktop Canvas Fix
     const canvas=document.getElementById('field-canvas'),ctx=canvas.getContext('2d');let w=0,h=0,dpr=1,points=[],pointer={x:.5,y:.5},raf=0;
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     
@@ -147,7 +148,7 @@
           const q=points[j],dx=x-(q.x+ox),dy=y-(q.y+oy),dist=Math.hypot(dx,dy);
           if(dist<105){
             ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(q.x+ox,q.y+oy);
-            ctx.strokeStyle=`rgba(142,150,213,${(1-dist/105)*.105})`;
+            ctx.strokeStyle = `rgba(142,150,213,${(1-dist/105)*.105})`;
             ctx.lineWidth=.7;ctx.stroke();
           }
         }
@@ -158,7 +159,6 @@
     addEventListener('resize',resize);
     addEventListener('pointermove',e=>{pointer.x=e.clientX/w;pointer.y=e.clientY/h;},{passive:true});
     
-    // Start the animation loop
     resize();
     draw(false);
 
@@ -167,7 +167,7 @@
     function parsePost(text,file){const match=text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*(?:\r?\n|$)/),meta={};let body=text;if(match){for(const line of match[1].split(/\r?\n/)){const m=line.match(/^([A-Za-z0-9_-]+):\s*(.*?)\s*$/);if(m){let v=m[2];if((v.startsWith('"')&&v.endsWith('"'))||(v.startsWith("'")&&v.endsWith("'")))v=v.slice(1,-1);meta[m[1].toLowerCase()]=v;}}body=text.slice(match[0].length);}const plain=body.replace(/```[\s\S]*?```/g,' ').replace(/`([^`]+)`/g,'$1').replace(/!\[[^\]]*\]\([^)]*\)/g,' ').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/[#>*_~|-]/g,' ').replace(/\s+/g,' ').trim();return{file,title:meta.title||file.replace(/\.md$/i,'').replace(/[-_]/g,' '),category:meta.category||'General',difficulty:meta.difficulty||'',date:meta.date||'',excerpt:meta.description||plain.slice(0,165)+(plain.length>165?'…':'')};}
     function slug(v){return v.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}function dateVal(v){const d=new Date(v);return Number.isNaN(d.getTime())?0:d.getTime();}function fmtDate(v){if(!v)return'Recent';const d=new Date(v);return Number.isNaN(d.getTime())?v:new Intl.DateTimeFormat(undefined,{year:'numeric',month:'short',day:'numeric'}).format(d);}function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
     function renderFilters(){filtersEl.replaceChildren();const map=new Map();posts.forEach(p=>map.set(p.category,(map.get(p.category)||0)+1));const choices=[['all','All topics',posts.length],...[...map.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([n,c])=>[slug(n),n,c])];choices.forEach(([key,name,num])=>{const b=el('button','filter'+(activeCategory===key?' active':''));b.type='button';b.setAttribute('aria-pressed',String(activeCategory===key));b.append(document.createTextNode(name));b.append(el('span','filter-count',String(num)));b.addEventListener('click',()=>{activeCategory=key;renderFilters();renderPosts();});filtersEl.append(b);});}
-    function renderPosts(){const q=searchEl.value.trim().toLowerCase(),items=posts.filter(p=>(activeCategory==='all'||slug(p.category)===activeCategory)&&`${p.title} ${p.category} ${p.excerpt} ${p.difficulty}`.toLowerCase().includes(q));container.replaceChildren();countEl.textContent=`${items.length} ${items.length===1?'writeup':'writeups'}`;if(!items.length){const box=el('div','empty');box.append(el('strong','',posts.length?'No matching writeups':'Nothing published yet'),document.createTextNode(posts.length?'Try a different topic or search term.':'Publish a post from the HackLogs admin panel.'));container.append(box);return;}items.forEach(p=>{const a=el('a','post-card');a.href=`post.html?file=${encodeURIComponent(p.file)}`;const top=el('div','card-meta');top.append(el('span','cat',p.category),el('span','','·'),el('span','',fmtDate(p.date)));const mid=el('div');mid.append(el('h4','',p.title),el('p','',p.excerpt||'Open this field note for the full methodology and takeaways.'));const foot=el('div','card-foot');foot.append(el('span','difficulty',p.difficulty||'FIELD NOTE'),el('span','card-read','Read writeup →'));a.append(top,mid,foot);container.append(a);});}
+    function renderPosts(){const q=searchEl.value.trim().toLowerCase(),items=posts.filter(p=>(activeCategory==='all'||slug(p.category)===activeCategory)&&`${p.title} ${p.category} ${p.excerpt} ${p.difficulty}`.toLowerCase().includes(q));container.replaceChildren();countEl.textContent = `${items.length} ${items.length===1?'writeup':'writeups'}`;if(!items.length){const box=el('div','empty');box.append(el('strong','',posts.length?'No matching writeups':'Nothing published yet'),document.createTextNode(posts.length?'Try a different topic or search term.':'Publish a post from the HackLogs admin panel.'));container.append(box);return;}items.forEach(p=>{const a=el('a','post-card');a.href = `post.html?file=${encodeURIComponent(p.file)}`;const top=el('div','card-meta');top.append(el('span','cat',p.category),el('span','','·'),el('span','',fmtDate(p.date)));const mid=el('div');mid.append(el('h4','',p.title),el('p','',p.excerpt||'Open this field note for the full methodology and takeaways.'));const foot=el('div','card-foot');foot.append(el('span','difficulty',p.difficulty||'FIELD NOTE'),el('span','card-read','Read writeup →'));a.append(top,mid,foot);container.append(a);});}
     async function loadPosts(){try{const response=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/content/writeups?ref=${branch}`,{headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error(`GitHub API ${response.status}`);const files=await response.json(),md=Array.isArray(files)?files.filter(f=>f.type==='file'&&f.name.toLowerCase().endsWith('.md')):[];const results=await Promise.all(md.map(async f=>{const r=await fetch(f.download_url);if(!r.ok)return null;return parsePost(await r.text(),f.name);}));posts=results.filter(Boolean).sort((a,b)=>dateVal(b.date)-dateVal(a.date));renderFilters();renderPosts();}catch(error){console.error('Could not load writeups:',error);container.replaceChildren();const box=el('div','empty');box.append(el('strong','','Could not load writeups'),'Check your connection or try again later.');container.append(box);}}
     searchEl.addEventListener('input',renderPosts);
     const slot=document.getElementById('home-top-ad-slot'),ad=document.getElementById('home-top-ad-content'),showAd=()=>{if(ad.querySelector('iframe,ins,[data-ad-status="filled"]')){slot.classList.add('filled');return true;}return false;};if(!showAd()){const observer=new MutationObserver(()=>{if(showAd())observer.disconnect();});observer.observe(ad,{childList:true,subtree:true,attributes:true});setTimeout(()=>{if(!showAd())slot.remove();observer.disconnect();},12000);}loadPosts();
