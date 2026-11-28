@@ -316,4 +316,4 @@ curl -sL -o /dev/null -w '%{num_redirects} %{url_effective}\n' URL
 
 HTTP is just text that the **client controls**: path, parameters, headers, cookies, body, even the `Host`. A bug appears when the server trusts any of it too much. Today's habit: *change one thing, measure, diff.*
 
-**Tomorrow (Day 2):** Burp Suite setup. Proxy, certificate, Repeater, and how to use everything from today inside it.
+**Tomorrow:** Burp Suite setup. Proxy, certificate, Repeater, and how to use everything from today inside it.
