@@ -349,25 +349,28 @@
     }
 
     function copyButtons(){
-      bodyEl.querySelectorAll('pre').forEach(pre=>{
-        const b=document.createElement('button');
-        b.className='copy';
-        b.type='button';
-        b.textContent='Copy';
-        b.addEventListener('click',async()=>{
-          try{
-            await navigator.clipboard.writeText(pre.querySelector('code')?.innerText||pre.innerText);
-            b.textContent='Copied';
-            setTimeout(()=>b.textContent='Copy',1300);
-          }catch{
-            b.textContent='Select code';
-            setTimeout(()=>b.textContent='Copy',1500);
-          }
-        });
-        pre.append(b);
-      });
-    }
-
+  bodyEl.querySelectorAll('pre').forEach(pre=>{
+    const wrap=document.createElement('div');
+    wrap.className='codewrap';
+    pre.parentNode.insertBefore(wrap,pre);
+    wrap.appendChild(pre);
+    const b=document.createElement('button');
+    b.className='copy';
+    b.type='button';
+    b.textContent='Copy';
+    b.addEventListener('click',async()=>{
+      try{
+        await navigator.clipboard.writeText(pre.querySelector('code')?.innerText||pre.innerText);
+        b.textContent='Copied';
+        setTimeout(()=>b.textContent='Copy',1300);
+      }catch{
+        b.textContent='Select code';
+        setTimeout(()=>b.textContent='Copy',1500);
+      }
+    });
+    wrap.append(b);
+  });
+}
     function watchAd(slotId,contentId){
       const slot=document.getElementById(slotId);
       const content=document.getElementById(contentId);
